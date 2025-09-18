@@ -37,6 +37,8 @@ module Api
       private
 
       def validate_custom_fields!
+        return if @building.client_id.blank?
+        
         client = Client.find(@building.client_id)
         field_configs = client.custom_fields.index_by(&:name)
 
@@ -53,7 +55,8 @@ module Api
           end
 
           if config.field_type == 'enum' && !config.validations['enum_values'].include?(v)
-            @building.errors.add(k.to_sym, "'#{v}' is not a valid option. Please choose from: #{config.validations['enum_values'].join(', ')}.")
+            valid_vals = config.validations['enum_values'].join(', ')
+            @building.errors.add(k.to_sym, "'#{v}' is not a valid option. Please choose from: #{valid_vals}.")
           end
         end
       end
