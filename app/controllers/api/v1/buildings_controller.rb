@@ -21,6 +21,17 @@ module Api
       end
 
       def update
+        @building = Building.find(params[:id])
+        @building.assign_attributes(building_params)
+        validate_custom_fields!
+        
+        if @building.errors.any?
+          render json: { error: @building.errors.full_messages }, status: :unprocessable_entity
+        elsif @building.save
+          render status: 204
+        else
+          render json: { error: @building.errors.full_messages }, status: :unprocessable_entity
+        end
       end
       
       private
