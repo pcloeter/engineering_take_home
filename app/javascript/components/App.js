@@ -10,6 +10,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [buildingToEdit, setBuildingToEdit] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
 
   const fetchData = async () => {
@@ -50,10 +51,15 @@ const App = () => {
     fetchData();
   }, [])
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (message) => {
     setShowForm(false);
     setBuildingToEdit(null);
-    fetchData();
+    setSuccessMessage(message);
+    fetchData(); 
+
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
   };
 
   const handleEditClick = (building) => {
@@ -72,9 +78,10 @@ const App = () => {
   
   return (
     <div className="app">
-      <h3>Very Interesting Buildings</h3>
+      <h3 className="main-header">Very Interesting Buildings</h3>
+      {successMessage && <p className="success-message">{successMessage}</p>}
       {!showForm && (
-        <button onClick={handleCreateClick} className="btn btn-create">
+        <button onClick={handleCreateClick} className="btn-primary">
           Create New Building
         </button>
       )}
@@ -89,7 +96,7 @@ const App = () => {
       { error ? (
         <p className="error">{error}</p>
         ) : (
-          <ul>
+          <ul className="card-list">
             { buildings.length && buildings.map( building => (
               <BuildingCardComponent key={building.id} building={building} onEdit={handleEditClick}/>
             ))}

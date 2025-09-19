@@ -18,7 +18,7 @@ ActiveRecord::Base.transaction do
   CustomField.create!(client: jafar, name: 'number_of_palm_trees', field_type: 'number')
   
   CustomField.create!(client: maleficent, name: 'rose_bush_count', field_type: 'number')
-  CustomField.create!(client: maleficent, name: 'is_it_haunted', field_type: 'enum', validations: { enum_values: ['Definitely Not', 'Probably', 'Yes, but the ghost is friendly'] })
+  CustomField.create!(client: maleficent, name: 'is_it_haunted', field_type: 'enum', validations: { enum_values: ['Definitely Not', 'Probably', 'Yes but the ghost is friendly'] })
   CustomField.create!(client: maleficent, name: 'garden_gnome_situation', field_type: 'freeform')
   
   CustomField.create!(client: scar, name: 'view_rating_out_of_10', field_type: 'number')

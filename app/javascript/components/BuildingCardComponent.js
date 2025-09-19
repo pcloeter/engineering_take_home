@@ -5,11 +5,11 @@ const BuildingCard = ({ building, onEdit }) => {
 
   return (
     <div className="card">
-      <h3 className="card-header">{address}</h3>
-      <p>{state}, {zip}</p>
+      <h5 className="card-header">{address}</h5>
+      <p className="address">{state}, {zip}</p>
       <p><strong>Client:</strong> {client_name}</p>
       <hr />
-      <h4>Custom Details:</h4>
+      <h5>Custom Details:</h5>
       <ul className="card-details-list">
         {Object.entries(customFields).map(([key, value]) => (
           <li key={key}>
@@ -17,7 +17,7 @@ const BuildingCard = ({ building, onEdit }) => {
           </li>
         ))}
       </ul>
-      <button onClick={() => onEdit(building)}>Edit</button>
+      <button className='btn-secondary' onClick={() => onEdit(building)}>Edit</button>
     </div>
   );
 };

@@ -14,7 +14,7 @@ module Api
         if @building.errors.any?
           render json: { error: @building.errors.full_messages }, status: :unprocessable_entity
         elsif @building.save
-          render status: 201 
+          render json: { status: 'success', message: 'Building created successfully' }, status: 201
         else
           render json: { error: @building.errors.full_messages }, status: :unprocessable_entity 
         end 
@@ -28,7 +28,7 @@ module Api
         if @building.errors.any?
           render json: { error: @building.errors.full_messages }, status: :unprocessable_entity
         elsif @building.save
-          render status: 204
+          render json: { status: 'success', message: 'Building updated successfully' }, status: :ok
         else
           render json: { error: @building.errors.full_messages }, status: :unprocessable_entity
         end
@@ -50,8 +50,8 @@ module Api
             next
           end
 
-          if config.field_type == 'number' && !v.is_a?(Numeric)
-            @building.errors.add(k.to_sym, "must be a number, but received '#{v}'.")
+          if config.field_type == 'number' && !v.to_s.match?(/\A\d+(\.\d+)?\z/)
+            @building.errors.add(k.to_sym, "must be a positive number, but received '#{v}'.")
           end
 
           if config.field_type == 'enum' && !config.validations['enum_values'].include?(v)
@@ -67,8 +67,9 @@ module Api
           :client_id,
           :address,
           :state,
-          :zip
-        ).merge(custom_fields: params[:building][:custom_fields] || {})
+          :zip,
+          custom_fields: params.require(:building).fetch(:custom_fields, {}).keys
+        )
       end
       
       def format_buildings_json(buildings)
@@ -78,6 +79,7 @@ module Api
       def format_building(building)
         {
           id: building.id,
+          client_id: building.client_id,
           client_name: building.client.name,
           address: building.address,
           # these were not in the sample output, but including them for functionality and clarity on the frontend

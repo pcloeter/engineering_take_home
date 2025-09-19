@@ -8,22 +8,31 @@ const BuildingFormComponent = ({ buildingToEdit, onSuccess, clients }) => {
   const [customFieldValues, setCustomFieldValues] = useState({});
 
   useEffect(() => {
-    if (buildingToEdit) {
-      setSelectedClientId(buildingToEdit.client_id || '');
-      setAddress(buildingToEdit.address || '');
-      // This is why we needed to include state & zip in the buildings fetch
-      setState(buildingToEdit.state || '');
-      setZip(buildingToEdit.zip || '');
-      setCustomFieldValues(buildingToEdit.custom_fields || {});
-    } else {
-      // For create
-      setSelectedClientId('');
-      setAddress('');
-      setState('');
-      setZip('');
-      setCustomFieldValues({});
-    }
-  }, [buildingToEdit]);
+  if (buildingToEdit) {
+    const {
+      id,
+      client_id = '',
+      client_name,
+      address = '',
+      state = '',
+      zip = '',
+      ...customFields 
+    } = buildingToEdit;
+
+    setSelectedClientId(client_id);
+    setAddress(address);
+    setState(state);
+    setZip(zip);
+    setCustomFieldValues(customFields);
+  } else {
+    // Reset form for 'create' mode
+    setSelectedClientId('');
+    setAddress('');
+    setState('');
+    setZip('');
+    setCustomFieldValues({});
+  }
+}, [buildingToEdit]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +56,8 @@ const BuildingFormComponent = ({ buildingToEdit, onSuccess, clients }) => {
       });
 
       if (response.ok) {
-        onSuccess();
+        const successData = await response.json();
+        onSuccess(successData.message);
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error.join(', ')}`);
@@ -62,14 +72,14 @@ const BuildingFormComponent = ({ buildingToEdit, onSuccess, clients }) => {
 
   return (
     <form onSubmit={handleSubmit} className="card">
-      <h3>{buildingToEdit ? 'Edit Interesting Building' : 'Create New Interesting Building'}</h3>
-      <select value={selectedClientId} onChange={(e) => setSelectedClientId(Number(e.target.value))} required>
+      <h4 className="create-header">{buildingToEdit ? 'Edit Interesting Building' : 'Create New Interesting Building'}</h4>
+      <select className="form-select" value={selectedClientId} onChange={(e) => setSelectedClientId(Number(e.target.value))} required>
         <option value="">-- Choose a Client! --</option>
         {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
       </select>
-      <input type="text" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} required />
-      <input type="text" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} required />
-      <input type="text" placeholder="Zip" value={zip} onChange={(e) => setZip(e.target.value)} required />
+      <input className="form-input" type="text" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+      <input className="form-input" type="text" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} required />
+      <input className="form-input" type="text" placeholder="Zip" value={zip} onChange={(e) => setZip(e.target.value)} required />
       
       {fieldsToRender.length > 0 && <hr />}
       
@@ -79,16 +89,19 @@ const BuildingFormComponent = ({ buildingToEdit, onSuccess, clients }) => {
             {field.name.replace(/_/g, ' ')}
           </label>
           <input
+            className="form-input"
             type={field.field_type === 'number' ? 'number' : 'text'}
+            min={field.field_type === 'number' ? '0' : undefined}
             value={customFieldValues[field.name] || ''}
             onChange={(e) => setCustomFieldValues(prev => ({ ...prev, [field.name]: e.target.value }))}
           />
         </div>
       ))}
-
-      <button type="submit" style={{ marginTop: '1rem' }}>
-        {buildingToEdit ? 'Update Building' : 'Create Building'}
-      </button>
+      <div>
+        <button type="submit" className='btn-secondary'>
+          {buildingToEdit ? 'Update Building' : 'Create Building'}
+        </button>
+      </div>
     </form>
   );
 };
