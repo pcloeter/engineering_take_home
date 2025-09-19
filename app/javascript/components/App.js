@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import LoaderComponent from './LoaderComponent';
 import BuildingCardComponent from './BuildingCardComponent';
 import BuildingFormComponent from './BuildingFormComponent';
@@ -11,6 +11,7 @@ const App = () => {
   const [buildingToEdit, setBuildingToEdit] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const formRef = useRef(null);
 
 
   const fetchData = async () => {
@@ -51,11 +52,18 @@ const App = () => {
     fetchData();
   }, [])
 
+  useEffect(() => {
+    if (showForm) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showForm]);
+
   const handleFormSuccess = (message) => {
     setShowForm(false);
     setBuildingToEdit(null);
     setSuccessMessage(message);
-    fetchData(); 
+    fetchData();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
 
     setTimeout(() => {
       setSuccessMessage('');
@@ -86,13 +94,15 @@ const App = () => {
         </button>
       )}
       
-      {showForm && (
-        <BuildingFormComponent
-          buildingToEdit={buildingToEdit}
-          onSuccess={handleFormSuccess}
-          clients={clients}
-        />
-      )}
+      <div ref={formRef}>
+        {showForm && (
+          <BuildingFormComponent
+            buildingToEdit={buildingToEdit}
+            onSuccess={handleFormSuccess}
+            clients={clients}
+          />
+        )}
+      </div>
       { error ? (
         <p className="error">{error}</p>
         ) : (
