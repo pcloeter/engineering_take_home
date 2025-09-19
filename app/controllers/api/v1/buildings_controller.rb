@@ -80,9 +80,9 @@ module Api
           id: building.id,
           client_name: building.client.name,
           address: building.address,
-          # was not in the sample output, but if it were desired:
-          # state: building.state,
-          # zip: building.zip
+          # these were not in the sample output, but including them for functionality and clarity on the frontend
+          state: building.state,
+          zip: building.zip
         }.merge(building.custom_fields)
       end
     end

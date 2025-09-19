@@ -6,6 +6,7 @@ const BuildingCard = ({ building, onEdit }) => {
   return (
     <div className="card">
       <h3 className="card-header">{address}</h3>
+      <p>{state}, {zip}</p>
       <p><strong>Client:</strong> {client_name}</p>
       <hr />
       <h4>Custom Details:</h4>
