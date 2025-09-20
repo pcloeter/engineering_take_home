@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import LoaderComponent from './LoaderComponent';
 import BuildingCardComponent from './BuildingCardComponent';
 import BuildingFormComponent from './BuildingFormComponent';
@@ -12,16 +12,16 @@ const App = () => {
   const [showForm, setShowForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const formRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationData, setPaginationData] = useState(null);
 
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const [buildingsResponse, clientsResponse] = await Promise.all(
-        [
-          fetch('api/v1/buildings'),
-          fetch('api/v1/clients')
-        ]
-      )
+      const [buildingsResponse, clientsResponse] = await Promise.all([
+        fetch(`/api/v1/buildings?page=${currentPage}`, { headers: { 'Accept': 'application/json' } }),
+        fetch('/api/v1/clients', { headers: { 'Accept': 'application/json' } })
+      ]);
       
       if (!buildingsResponse.ok) {
         const errorData = await buildingsResponse.json();
@@ -37,6 +37,7 @@ const App = () => {
       const clientsData = await clientsResponse.json();
       setBuildings(buildingsData.buildings);
       setClients(clientsData.clients)
+      setPaginationData(buildingsData.pagination);
 
     } catch(e) {
       // For the UX
@@ -46,11 +47,11 @@ const App = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [currentPage])
 
   useEffect(() => {
     fetchData();
-  }, [])
+  }, [fetchData]);
 
   useEffect(() => {
     if (showForm) {
@@ -62,12 +63,15 @@ const App = () => {
     setShowForm(false);
     setBuildingToEdit(null);
     setSuccessMessage(message);
-    fetchData();
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    setTimeout(() => {
-      setSuccessMessage('');
-    }, 3000);
+    if (currentPage === 1) {
+      fetchData();
+    } else {
+      setCurrentPage(1);
+    }
+
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   const handleEditClick = (building) => {
@@ -111,6 +115,23 @@ const App = () => {
               <BuildingCardComponent key={building.id} building={building} onEdit={handleEditClick}/>
             ))}
           </ul>
+        )}
+        {paginationData && paginationData.pages > 1 && (
+          <div className="pagination-controls">
+            <button 
+              className="btn"
+              onClick={() => setCurrentPage(paginationData.prev)} 
+              disabled={!paginationData.prev}>
+              Previous
+            </button>
+            <span> Page {paginationData.page} of {paginationData.pages} </span>
+            <button 
+              className="btn"
+              onClick={() => setCurrentPage(paginationData.next)} 
+              disabled={!paginationData.next}>
+              Next
+            </button>
+          </div>
         )}
     </div>
   );

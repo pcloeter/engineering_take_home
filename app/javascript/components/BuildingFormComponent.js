@@ -51,7 +51,10 @@ const BuildingFormComponent = ({ buildingToEdit, onSuccess, clients }) => {
     try {
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ building: buildingData }),
       });
 

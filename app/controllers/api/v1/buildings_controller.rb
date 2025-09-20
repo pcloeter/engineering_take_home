@@ -2,8 +2,28 @@ module Api
   module V1 
     class BuildingsController < ActionController::API
       def index
-        buildings = Building.includes(:client).all
-        render json: { status: "success", buildings: format_buildings_json(buildings) }
+        # Manual pagination instead of pagy
+        page = params.fetch(:page, 1).to_i
+        per_page = 5
+
+        total_buildings = Building.count
+        buildings = Building.includes(:client).limit(per_page).offset((page - 1) * per_page)
+
+        total_pages = (total_buildings.to_f / per_page).ceil
+        pagination_data = {
+          page: page,
+          pages: total_pages,
+          prev: page > 1 ? page - 1 : nil,
+          next: page < total_pages ? page + 1 : nil,
+          count: total_buildings,
+          items: per_page
+        }
+
+        render json: {
+          status: "success",
+          buildings: format_buildings_json(buildings),
+          pagination: pagination_data
+        }
       end
 
       def create
